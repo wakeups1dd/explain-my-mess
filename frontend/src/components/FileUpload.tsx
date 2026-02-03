@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, ImageIcon } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface FileUploadProps {
@@ -55,26 +55,33 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
 
     return (
         <div className="w-full">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Custom Image (Optional)
+            <label className="block text-sm font-semibold text-text-primary mb-3">
+                Image (Optional)
             </label>
 
             {selectedFile && previewUrl ? (
-                <div className="relative rounded-lg border border-gray-200 bg-gray-50 p-4 flex items-center justify-center overflow-hidden">
-                    <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="max-h-64 object-contain rounded-md"
-                    />
-                    <button
-                        onClick={clearFile}
-                        className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-sm hover:bg-gray-100 border border-gray-200"
-                        title="Remove image"
-                    >
-                        <X className="w-4 h-4 text-gray-500" />
-                    </button>
-                    <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
-                        {selectedFile.name}
+                <div className="relative rounded-2xl border-2 border-border/30 bg-surface-elevated shadow-luxury p-5 hover-luxury">
+                    <div className="flex items-center justify-center mb-4 rounded-xl overflow-hidden border border-border/20">
+                        <img
+                            src={previewUrl}
+                            alt="Preview"
+                            className="max-h-56 object-contain"
+                        />
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
+                            <div className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
+                                <ImageIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <span className="truncate max-w-[200px]">{selectedFile.name}</span>
+                        </div>
+                        <button
+                            onClick={clearFile}
+                            className="p-2 rounded-lg border border-border/30 bg-surface hover:bg-error/10 hover:border-error/50 transition-all duration-300 hover-luxury"
+                            title="Remove"
+                        >
+                            <X className="w-4 h-4 text-text-secondary hover:text-error" />
+                        </button>
                     </div>
                 </div>
             ) : (
@@ -84,10 +91,10 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                     className={cn(
-                        "relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
+                        "relative rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-all duration-300",
                         isDragging
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-300 hover:border-gray-400 bg-white"
+                            ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20 shadow-glow"
+                            : "border-border/30 bg-surface-elevated hover:border-primary/50 hover:bg-surface hover-luxury"
                     )}
                 >
                     <input
@@ -96,15 +103,21 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
                         onChange={handleChange}
                         accept="image/*"
                     />
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                        <div className="p-3 bg-gray-100 rounded-full">
-                            <Upload className="w-6 h-6 text-gray-500" />
+                    <div className="flex flex-col items-center justify-center gap-3">
+                        <div className={cn(
+                            "p-4 rounded-2xl transition-all duration-300",
+                            isDragging ? "gradient-emerald shadow-luxury" : "bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30"
+                        )}>
+                            <Upload className={cn(
+                                "w-8 h-8 transition-colors duration-300",
+                                isDragging ? "text-white" : "text-purple-600 dark:text-purple-400"
+                            )} />
                         </div>
-                        <div className="text-sm font-medium text-gray-900">
-                            Click to upload or drag and drop
+                        <div className="text-sm font-semibold text-text-primary">
+                            {isDragging ? 'Drop your image here!' : 'Click or drag image'}
                         </div>
-                        <div className="text-xs text-gray-500">
-                            SVG, PNG, JPG or GIF (max 800x400px)
+                        <div className="text-xs text-text-tertiary">
+                            PNG, JPG, GIF up to 10MB
                         </div>
                     </div>
                 </div>

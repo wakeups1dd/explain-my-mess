@@ -1,3 +1,281 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ===== ARTSY & EXTRAVAGANT Design System ===== */
+@layer base {
+  :root {
+    /* Cursor position for interactive gradients */
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+
+    /* Luxurious Jewel Tone Palette */
+    --color-primary: 147 51 234;
+    /* deep purple */
+    --color-primary-hover: 126 34 206;
+    /* darker purple */
+    --color-secondary: 16 185 129;
+    /* emerald */
+    --color-accent: 251 191 36;
+    /* gold */
+    --color-tertiary: 219 39 119;
+    /* rose */
+
+    /* Sophisticated backgrounds */
+    --color-background: 250 245 255;
+    /* lavender mist */
+    --color-surface: 255 255 255;
+    /* pure white */
+    --color-surface-elevated: 255 250 245;
+    /* warm white */
+
+    --color-text-primary: 30 27 75;
+    /* deep indigo */
+    --color-text-secondary: 100 116 139;
+    /* slate */
+    --color-text-tertiary: 148 163 184;
+    /* light slate */
+
+    /* Elegant borders */
+    --color-border: 226 232 240;
+    /* soft gray */
+    --color-border-light: 241 245 249;
+    /* lighter */
+
+    --color-success: 16 185 129;
+    /* emerald */
+    --color-error: 244 63 94;
+    /* rose */
+
+    /* Luxurious glowing shadows */
+    --shadow-glow: 0 0 30px rgba(147, 51, 234, 0.3);
+    --shadow-glow-lg: 0 0 60px rgba(147, 51, 234, 0.4);
+    --shadow-luxury: 0 20px 60px -15px rgba(0, 0, 0, 0.15), 0 0 40px rgba(147, 51, 234, 0.1);
+    --shadow-gold: 0 10px 40px rgba(251, 191, 36, 0.3);
+
+    /* Elegant curves */
+    --radius-md: 0.75rem;
+    /* 12px */
+    --radius-lg: 1rem;
+    /* 16px */
+    --radius-xl: 1.5rem;
+    /* 24px */
+    --radius-2xl: 2rem;
+    /* 32px */
+
+    /* Smooth transitions */
+    --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Dark mode - equally luxurious */
+  .dark {
+    --color-background: 15 23 42;
+    /* deep navy */
+    --color-surface: 30 41 59;
+    /* slate */
+    --color-surface-elevated: 51 65 85;
+    /* lighter slate */
+
+    --color-text-primary: 248 250 252;
+    /* cream */
+    --color-text-secondary: 203 213 225;
+    /* light */
+    --color-text-tertiary: 148 163 184;
+    /* medium */
+
+    --color-border: 71 85 105;
+    /* slate border */
+
+    --shadow-glow: 0 0 40px rgba(147, 51, 234, 0.5);
+    --shadow-glow-lg: 0 0 80px rgba(147, 51, 234, 0.6);
+    --shadow-luxury: 0 20px 60px -15px rgba(0, 0, 0, 0.5), 0 0 40px rgba(147, 51, 234, 0.2);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-text-primary;
+    font-family: 'Inter', 'Playfair Display', Georgia, serif;
+    background: linear-gradient(135deg, rgb(250 245 255) 0%, rgb(255 250 245) 100%);
+    transition: all var(--transition-base);
+  }
+
+  .dark body {
+    background: linear-gradient(135deg, rgb(15 23 42) 0%, rgb(30 27 75) 100%);
+  }
+
+  /* Elegant Typography */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold text-text-primary;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, rgb(147 51 234) 0%, rgb(219 39 119) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  h1 {
+    @apply text-5xl md:text-6xl;
+    font-weight: 800;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+    font-weight: 700;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+    font-weight: 700;
+  }
+
+  p {
+    @apply text-text-secondary leading-relaxed;
+    font-weight: 400;
+  }
+
+  /* Elegant focus states */
+  *:focus-visible {
+    @apply outline-none;
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.3);
+    transition: box-shadow var(--transition-base);
+  }
+}
+
+/* ===== Luxurious Utilities ===== */
+@layer utilities {
+
+  /* Premium gradients */
+  .gradient-luxury {
+    background: linear-gradient(135deg, rgb(147 51 234) 0%, rgb(126 34 206) 100%);
+  }
+
+  .gradient-gold {
+    background: linear-gradient(135deg, rgb(251 191 36) 0%, rgb(245 158 11) 100%);
+  }
+
+  .gradient-emerald {
+    background: linear-gradient(135deg, rgb(16 185 129) 0%, rgb(5 150 105) 100%);
+  }
+
+  .gradient-rose {
+    background: linear-gradient(135deg, rgb(244 63 94) 0%, rgb(219 39 119) 100%);
+  }
+
+  .gradient-rainbow {
+    background: linear-gradient(135deg,
+        rgb(147 51 234) 0%,
+        rgb(219 39 119) 25%,
+        rgb(251 191 36) 50%,
+        rgb(16 185 129) 75%,
+        rgb(147 51 234) 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+  }
+
+  /* Glowing effects */
+  .glow-purple {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+
+  .shadow-luxury {
+    box-shadow: var(--shadow-luxury);
+  }
+
+  /* Luxurious animations */
+  @keyframes gradientShift {
+
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% center;
+    }
+
+    100% {
+      background-position: 200% center;
+    }
+  }
+
+  @keyframes glow {
+
+    0%,
+    100% {
+      box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
+    }
+
+    50% {
+      box-shadow: 0 0 40px rgba(147, 51, 234, 0.8);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  /* Hover effects */
+  .hover-luxury {
+    transition: all var(--transition-base);
+  }
+
+  .hover-luxury:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-luxury);
+  }
+
+  .hover-glow:hover {
+    box-shadow: var(--shadow-glow-lg);
+  }
+
+  /* Backdrop effects */
+  .backdrop-luxury {
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+  }
+}
