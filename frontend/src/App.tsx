@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
-import { Send, AlertCircle, CheckCircle2, Sparkles } from 'lucide-react';
+import { Send, AlertCircle, CheckCircle2, Sparkles, Mic, MicOff } from 'lucide-react';
 import { Layout } from './components/Layout';
 import { FileUpload } from './components/FileUpload';
 import { ExplanationDisplay } from './components/ExplanationDisplay';
@@ -14,10 +14,63 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+
+    // Reference for the speech recognition instance
+    const recognitionRef = useRef<any>(null);
 
     const charCount = textContext.length;
     const isNearLimit = charCount > MAX_CHARS * 0.8;
     const isOverLimit = charCount > MAX_CHARS;
+
+    const toggleListening = () => {
+        if (isListening) {
+            recognitionRef.current?.stop();
+            setIsListening(false);
+        } else {
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                setError('Speech recognition is not supported in this browser.');
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onstart = () => setIsListening(true);
+            recognition.onend = () => setIsListening(false);
+            recognition.onerror = (event: any) => {
+                console.error("Speech Recognition Error", event.error);
+                setIsListening(false);
+                if (event.error === 'not-allowed') {
+                    setError('Microphone access denied. Please allow microphone permissions.');
+                }
+            };
+
+            recognition.onresult = (event: any) => {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    setTextContext(prev => {
+                        const newText = prev + (prev ? ' ' : '') + finalTranscript;
+                        // Determine if we exceed max chars with new text - optional safety
+                        // For now just append
+                        return newText;
+                    });
+                }
+            };
+
+            recognitionRef.current = recognition;
+            recognition.start();
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -85,29 +138,42 @@ function App() {
                                     </label>
                                     <span
                                         className={`text-xs font-bold ${isOverLimit
-                                                ? 'text-error'
-                                                : isNearLimit
-                                                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent'
-                                                    : 'text-text-tertiary'
+                                            ? 'text-error'
+                                            : isNearLimit
+                                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent'
+                                                : 'text-text-tertiary'
                                             }`}
                                     >
                                         {charCount} / {MAX_CHARS}
                                     </span>
                                 </div>
-                                <textarea
-                                    id="context"
-                                    rows={10}
-                                    className={`block w-full rounded-xl border-2 bg-surface-elevated font-mono text-sm p-4 resize-none transition-all duration-300 focus:shadow-glow ${isOverLimit
+                                <div className="relative">
+                                    <textarea
+                                        id="context"
+                                        rows={10}
+                                        className={`block w-full rounded-xl border-2 bg-surface-elevated font-mono text-sm p-4 pb-12 resize-none transition-all duration-300 focus:shadow-glow ${isOverLimit
                                             ? 'border-error focus:border-error'
                                             : 'border-border/30 focus:border-primary'
-                                        }`}
-                                    placeholder="function example() {
+                                            }`}
+                                        placeholder="function example() {
   // paste your messy code here
   return magic;
 }"
-                                    value={textContext}
-                                    onChange={(e) => setTextContext(e.target.value)}
-                                />
+                                        value={textContext}
+                                        onChange={(e) => setTextContext(e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={toggleListening}
+                                        className={`absolute bottom-3 right-3 p-2 rounded-lg transition-all duration-300 ${isListening
+                                                ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 animate-pulse'
+                                                : 'bg-surface hover:bg-primary/10 text-text-tertiary hover:text-primary'
+                                            }`}
+                                        title={isListening ? "Stop recording" : "Start recording"}
+                                    >
+                                        {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                                    </button>
+                                </div>
                             </div>
 
                             <FileUpload
