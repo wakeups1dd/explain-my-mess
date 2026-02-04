@@ -37,7 +37,7 @@ export function ExplanationDisplay({ markdown, loading }: ExplanationDisplayProp
                     <Logo size="md" className="text-white" style={{ filter: 'drop-shadow(0 0 12px rgba(255, 255, 255, 0.4))' }} />
                 </div>
                 <div>
-                    <h2 className="text-xl font-bold text-pink-200">AI Explanation</h2>
+                    <h2 className="text-xl font-bold text-white" style={{ background: 'none', WebkitTextFillColor: 'initial', WebkitBackgroundClip: 'initial' }}>AI Explanation</h2>
                     <p className="text-xs text-white/80 font-medium">Generated with care ✨</p>
                 </div>
             </div>
