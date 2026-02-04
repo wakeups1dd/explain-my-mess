@@ -162,7 +162,7 @@ function App() {
 
     return (
         <Layout>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="max-w-4xl mx-auto space-y-8">
                 {/* Input Section */}
                 <div className="space-y-6">
                     <div className="bg-surface border border-border/20 rounded-2xl shadow-luxury p-8 hover-luxury backdrop-luxury">
@@ -370,21 +370,24 @@ function App() {
                     <ExplanationDisplay markdown={explanation} loading={loading} />
 
                     {!explanation && !loading && (
-                        <div className="h-full flex flex-col items-center justify-center p-16 text-center border-2 border-dashed border-border/30 rounded-2xl shadow-luxury hover-glow transition-all duration-300 group">
-                            <div className="relative mb-6 animate-float">
+                        <div className="h-full w-full flex items-center gap-8 p-10 border-2 border-dashed border-border/30 rounded-2xl shadow-luxury hover-glow transition-all duration-300 group bg-surface/50 backdrop-blur-sm">
+                            <div className="relative flex-shrink-0 animate-float">
                                 {/* Glowing aura */}
                                 <div className="absolute inset-0 gradient-rainbow rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
 
-                                <div className="relative w-24 h-24 gradient-emerald rounded-3xl flex items-center justify-center shadow-luxury rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                                    <Sparkles className="w-12 h-12 text-white" />
+                                <div className="relative w-20 h-20 gradient-emerald rounded-2xl flex items-center justify-center shadow-luxury rotate-6 group-hover:rotate-0 transition-transform duration-500">
+                                    <Sparkles className="w-10 h-10 text-white" />
                                 </div>
                             </div>
-                            <h3 className="text-2xl font-bold mb-3">
-                                Ready to Transform
-                            </h3>
-                            <p className="text-sm text-text-tertiary max-w-xs leading-relaxed">
-                                Submit your messy code or thoughts and watch as AI brings clarity and understanding ✨
-                            </p>
+
+                            <div className="text-left space-y-2">
+                                <h3 className="text-2xl font-bold">
+                                    Ready to Transform
+                                </h3>
+                                <p className="text-base text-text-tertiary leading-relaxed max-w-lg">
+                                    Submit your messy code or thoughts and watch as AI brings clarity and understanding ✨
+                                </p>
+                            </div>
                         </div>
                     )}
                 </div>
