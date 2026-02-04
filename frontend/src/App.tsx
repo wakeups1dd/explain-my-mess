@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
 import axios from 'axios';
-import { Send, AlertCircle, CheckCircle2, Sparkles, Mic, MicOff } from 'lucide-react';
+import { Send, AlertCircle, CheckCircle2, Sparkles, Mic, MicOff, Plus, X, ImageIcon, FileText, FileCode } from 'lucide-react';
 import { Layout } from './components/Layout';
-import { FileUpload } from './components/FileUpload';
+// FileUpload component removed
 import { ExplanationDisplay } from './components/ExplanationDisplay';
 import { VoiceVisualizer } from './components/VoiceVisualizer';
 
@@ -16,9 +16,53 @@ function App() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [isListening, setIsListening] = useState(false);
+    const [showFileMenu, setShowFileMenu] = useState(false);
+    const [allowedFileTypes, setAllowedFileTypes] = useState<string>('image/*');
 
     // Reference for the speech recognition instance
     const recognitionRef = useRef<any>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            // Simple validation - just set it
+            setSelectedFile(file);
+        }
+    };
+
+    const clearFile = () => {
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleFileTypeClick = (type: 'image' | 'doc' | 'pdf') => {
+        setShowFileMenu(false);
+        let acceptType = '';
+
+        switch (type) {
+            case 'image':
+                acceptType = 'image/*';
+                break;
+            case 'doc':
+                acceptType = '.txt,.md,.json,.js,.ts,.tsx,.css,.html'; // Text based docs for now
+                break;
+            case 'pdf':
+                acceptType = 'application/pdf';
+                break;
+        }
+
+        setAllowedFileTypes(acceptType);
+        // Timeout to allow state to update before clicking - a bit hacky but works for simple react updates usually, 
+        // or we use useEffect. But for file input click, immediate might send old accept or verify check. 
+        // Actually, setting state doesn't block, so click might happen before render update of input accept.
+        // Better to use a useEffect on allowedFileTypes or just accept all and validate in onChange, 
+        // but accept attribute updates file picker filter.
+        // Let's rely on standard flush.
+        setTimeout(() => fileInputRef.current?.click(), 0);
+    };
 
     const charCount = textContext.length;
     const isNearLimit = charCount > MAX_CHARS * 0.8;
@@ -95,7 +139,7 @@ function App() {
             const formData = new FormData();
             formData.append('text', textContext);
             if (selectedFile) {
-                formData.append('image', selectedFile);
+                formData.append('file', selectedFile);
             }
 
             const response = await axios.post('/api/explain', formData, {
@@ -152,7 +196,7 @@ function App() {
                                     <textarea
                                         id="context"
                                         rows={10}
-                                        className={`block w-full rounded-xl border-2 bg-surface-elevated font-mono text-sm p-4 pb-12 resize-none transition-all duration-300 focus:shadow-glow ${isOverLimit
+                                        className={`block w-full rounded-xl border-2 bg-surface-elevated font-mono text-sm p-4 pb-12 pl-12 resize-none transition-all duration-300 focus:shadow-glow ${isOverLimit
                                             ? 'border-error focus:border-error'
                                             : 'border-border/30 focus:border-primary'
                                             }`}
@@ -164,8 +208,77 @@ function App() {
                                         onChange={(e) => setTextContext(e.target.value)}
                                     />
 
+                                    {/* Hidden File Input */}
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept={allowedFileTypes}
+                                        onChange={handleFileSelect}
+                                    />
+
+                                    {/* Plus / Add Image Button */}
+                                    <div className="absolute bottom-3 left-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowFileMenu(!showFileMenu)}
+                                            className={`p-2 rounded-lg transition-all duration-300 hover-luxury ${showFileMenu
+                                                ? 'bg-primary text-white rotate-45'
+                                                : 'bg-surface hover:bg-primary/10 text-text-tertiary hover:text-primary'
+                                                }`}
+                                            title="Add attachment"
+                                        >
+                                            <Plus className="w-5 h-5" />
+                                        </button>
+
+                                        {/* File Type Menu */}
+                                        {showFileMenu && (
+                                            <>
+                                                {/* Backdrop to close menu */}
+                                                <div
+                                                    className="fixed inset-0 z-10"
+                                                    onClick={() => setShowFileMenu(false)}
+                                                />
+                                                <div className="absolute bottom-14 left-0 z-20 w-48 bg-surface-elevated rounded-xl shadow-luxury border border-border/30 overflow-hidden animate-in fade-in slide-in-from-bottom-2">
+                                                    <div className="p-2 space-y-1">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleFileTypeClick('image')}
+                                                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface transition-colors text-sm font-medium text-text-primary text-left"
+                                                        >
+                                                            <div className="p-1.5 rounded-md bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                                                                <ImageIcon className="w-4 h-4" />
+                                                            </div>
+                                                            Images
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleFileTypeClick('doc')}
+                                                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface transition-colors text-sm font-medium text-text-primary text-left"
+                                                        >
+                                                            <div className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                                                                <FileText className="w-4 h-4" />
+                                                            </div>
+                                                            Documents
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleFileTypeClick('pdf')}
+                                                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface transition-colors text-sm font-medium text-text-primary text-left"
+                                                        >
+                                                            <div className="p-1.5 rounded-md bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                                                                <FileCode className="w-4 h-4" />
+                                                            </div>
+                                                            PDF
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+
                                     {isListening && (
-                                        <div className="absolute left-4 right-16 bottom-0 h-16 pointer-events-none">
+                                        <div className="absolute left-16 right-16 bottom-0 h-16 pointer-events-none">
                                             <VoiceVisualizer />
                                         </div>
                                     )}
@@ -181,13 +294,35 @@ function App() {
                                     >
                                         {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                                     </button>
+
+                                    {/* File Preview Badge (Floating) */}
+                                    {selectedFile && (
+                                        <div className="absolute bottom-14 left-3 right-3 mx-auto max-w-fit animate-in fade-in slide-in-from-bottom-2">
+                                            <div className="flex items-center gap-2 p-2 pr-3 rounded-lg bg-surface-elevated border border-border/30 shadow-lg text-xs font-medium text-text-secondary">
+                                                <div className="p-1 rounded bg-emerald-50 dark:bg-emerald-900/30">
+                                                    {selectedFile.type.startsWith('image/') ? (
+                                                        <ImageIcon className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                                    ) : selectedFile.type === 'application/pdf' ? (
+                                                        <FileCode className="w-3 h-3 text-red-600 dark:text-red-400" />
+                                                    ) : (
+                                                        <FileText className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                                                    )}
+                                                </div>
+                                                <span className="truncate max-w-[150px]">{selectedFile.name}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={clearFile}
+                                                    className="ml-1 p-0.5 rounded-full hover:bg-error/10 hover:text-error transition-colors"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
-                            <FileUpload
-                                onFileSelect={setSelectedFile}
-                                selectedFile={selectedFile}
-                            />
+                            {/* Removed FileUpload component */}
 
                             {error && (
                                 <div className="rounded-xl bg-error/10 border-2 border-error/30 px-4 py-3 flex items-start gap-3">
@@ -253,8 +388,8 @@ function App() {
                         </div>
                     )}
                 </div>
-            </div>
-        </Layout>
+            </div >
+        </Layout >
     );
 }
 
