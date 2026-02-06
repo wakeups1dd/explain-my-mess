@@ -49,7 +49,7 @@ export function Layout({ children }: LayoutProps) {
                         <Logo size="md" className="text-white" style={{ filter: 'drop-shadow(0 0 12px rgba(255, 255, 255, 0.4))' }} />
                         <div>
                             <h1 className="text-2xl font-bold text-white tracking-tight" style={{ background: 'none', WebkitTextFillColor: 'white' }}>
-                                Explain My Mess
+                                Sortd
                             </h1>
                             <p className="text-xs text-white/80 font-medium">AI-Powered Clarity</p>
                         </div>
@@ -72,7 +72,7 @@ export function Layout({ children }: LayoutProps) {
                         <div className="flex items-center gap-2">
                             <Logo size="sm" className="opacity-60" />
                             <span className="font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                Explain My Mess
+                                Sortd
                             </span>
                             <span className="text-text-tertiary">·</span>
                             <span className="text-text-tertiary">v1.0</span>

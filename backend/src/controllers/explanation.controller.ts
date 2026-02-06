@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { GeminiService } from '../services/gemini.service';
-import { ExplainSchema } from '@explain-my-mess/common';
+import { ExplainSchema } from '@sortd/common';
 
 const geminiService = new GeminiService();
 

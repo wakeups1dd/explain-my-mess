@@ -1,5 +1,5 @@
 {
-    "name": "@explain-my-mess/common",
+    "name": "@sortd/common",
     "version": "1.0.0",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",

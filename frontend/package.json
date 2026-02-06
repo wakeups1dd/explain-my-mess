@@ -1,5 +1,5 @@
 {
-    "name": "@explain-my-mess/frontend",
+    "name": "@sortd/frontend",
     "private": true,
     "version": "0.0.0",
     "type": "module",
@@ -10,7 +10,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@explain-my-mess/common": "*",
+        "@sortd/common": "*",
         "axios": "^1.13.4",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
