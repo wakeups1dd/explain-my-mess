@@ -7,6 +7,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // POST /api/explain
 // Expects multipart/form-data with 'text' field and optional 'image' file
-router.post('/', upload.single('image'), ExplanationController.explain);
+router.post('/', upload.single('file'), ExplanationController.explain);
 
 export default router;
