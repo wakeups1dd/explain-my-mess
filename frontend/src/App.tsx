@@ -142,7 +142,8 @@ function App() {
                 formData.append('file', selectedFile);
             }
 
-            const response = await axios.post('/api/explain', formData, {
+            const API_URL = import.meta.env.VITE_API_URL || '';
+            const response = await axios.post(`${API_URL}/api/explain`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

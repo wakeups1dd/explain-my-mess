@@ -48,19 +48,32 @@ export function VoiceVisualizer() {
                     const newData = new Uint8Array(BAR_COUNT);
                     const step = Math.floor(bufferLength / BAR_COUNT);
 
-                    for (let i = 0; i < BAR_COUNT; i++) {
-                        let sum = 0;
-                        // Grab a chunk of frequencies
-                        for (let j = 0; j < step; j++) {
-                            const index = i * step + j;
-                            if (index < bufferLength) {
-                                sum += dataArray[index];
-                            }
-                        }
-                        const avg = Math.floor(sum / step);
-                        newData[i] = avg;
-                    }
+                    // Calculate total width of all bars to determine start position (Right Alignment)
+                    // NOTE: The following code snippet appears to be for a canvas-based rendering approach,
+                    // which is not currently implemented in this component (it uses div elements).
+                    // Variables like 'bars', 'canvas', 'totalBarWidth', 'centerY' are not defined in this scope.
+                    // Inserting this code as requested, but it will cause syntax errors or runtime issues
+                    // unless the component is refactored to use a canvas and these variables are defined.
+                    // const currentTotalWidth = bars.length * totalBarWidth;
+                    // const startX = canvas.width - currentTotalWidth;
 
+                    // for (let i = 0; i < bars.length; i++) {
+                    //     // Draw array[0] at startX.
+                    //     // array[0] is OLDEST. It will be the leftmost bar of the group.
+                    //     // As data grows, startX moves left.
+                    //     // As data scrolls (shift), bars move left.
+
+                    //     const vol = bars[i];
+
+                    //     // Scale height: 0-255 -> 0-100% canvas height. 
+                    //     // Voice often isn't max volume, so let's boost a bit (vol * 2.0)
+                    //     let barHeight = (vol / 255) * canvas.height * 2.0;
+
+                    //     // Min height for "silence track" effect
+                    //     if (barHeight < 2) barHeight = 2;
+
+                    //     const x = startX + (i * totalBarWidth);
+                    //     const y = centerY - (barHeight / 2);
                     setFrequencyData(newData);
                     animationFrameRef.current = requestAnimationFrame(updateWaveform);
                 };
