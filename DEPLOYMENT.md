@@ -40,12 +40,16 @@ Wait for the deployment to finish. Once live, copy the **onrender.com URL** (e.g
 
 Now we deploy the frontend and connect it to the backend.
 
+**CRITICAL STEP**: Pay attention to the **Root Directory** setting.
+
 1.  Log in to **Vercel** and click **Add New...** -> **Project**.
 2.  Import your GitHub repository (`sortd-monorepo`).
 3.  Configure the project:
     -   **Project Name**: `sortd-frontend`
     -   **Framework Preset**: **Vite**
-    -   **Root Directory**: `.` (Keep as is / project root).
+    -   **Root Directory**: **LEAVE THIS EMPTY** (It defaults to `.`).
+        -   **IMPORTANT**: If Vercel auto-detected `frontend` as the root directory, click **Edit** and set it back to `.` (the root of the repo).
+        -   If `Root Directory` is set to `frontend`, the build will fail with "No workspaces found".
     -   **Build Settings**:
         -   **Build Command**: `npm run build --workspace=frontend`
         -   **Output Directory**: `frontend/dist`
