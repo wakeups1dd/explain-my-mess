@@ -1,126 +1,156 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function VoiceVisualizer() {
-    // Number of bars to render
-    const BAR_COUNT = 40;
-    const [frequencyData, setFrequencyData] = useState<Uint8Array>(new Uint8Array(BAR_COUNT).fill(0));
-
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
+    const dataArrayRef = useRef<Uint8Array | null>(null);
     const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-    const streamRef = useRef<MediaStream | null>(null);
-    const animationFrameRef = useRef<number>();
+    const animationRef = useRef<number | null>(null);
+    // Store history of volume levels for scrolling effect
+    const historyRef = useRef<number[]>([]);
 
     useEffect(() => {
         const initAudio = async () => {
             try {
-                const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-                if (!AudioContext) return;
+                // Initialize Audio Context
+                audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
 
+                // Get user media
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                streamRef.current = stream;
 
-                const audioContext = new AudioContext();
-                audioContextRef.current = audioContext;
-
-                const analyser = audioContext.createAnalyser();
-                // fftSize corresponds to resolution. 
-                // 128 fftSize = 64 frequency bins. We'll pick a subset or interpolate.
+                // Create analyser
+                const analyser = audioContextRef.current.createAnalyser();
                 analyser.fftSize = 256;
-                analyser.smoothingTimeConstant = 0.5; // Smooth out the jitter
+                analyser.smoothingTimeConstant = 0.5; // Smooth out the spikes
                 analyserRef.current = analyser;
 
-                const source = audioContext.createMediaStreamSource(stream);
+                // Create source
+                const source = audioContextRef.current.createMediaStreamSource(stream);
                 source.connect(analyser);
                 sourceRef.current = source;
 
+                // Create data array
                 const bufferLength = analyser.frequencyBinCount;
-                const dataArray = new Uint8Array(bufferLength);
+                dataArrayRef.current = new Uint8Array(bufferLength);
 
-                const updateWaveform = () => {
-                    if (!analyserRef.current) return;
-
-                    analyserRef.current.getByteFrequencyData(dataArray);
-
-                    // We have 'bufferLength' data points (e.g. 128).
-                    // We want to map this to 'BAR_COUNT' (e.g. 40).
-                    // We'll calculate average for chunks to downsample.
-                    const newData = new Uint8Array(BAR_COUNT);
-                    const step = Math.floor(bufferLength / BAR_COUNT);
-
-                    // Calculate total width of all bars to determine start position (Right Alignment)
-                    // NOTE: The following code snippet appears to be for a canvas-based rendering approach,
-                    // which is not currently implemented in this component (it uses div elements).
-                    // Variables like 'bars', 'canvas', 'totalBarWidth', 'centerY' are not defined in this scope.
-                    // Inserting this code as requested, but it will cause syntax errors or runtime issues
-                    // unless the component is refactored to use a canvas and these variables are defined.
-                    // const currentTotalWidth = bars.length * totalBarWidth;
-                    // const startX = canvas.width - currentTotalWidth;
-
-                    // for (let i = 0; i < bars.length; i++) {
-                    //     // Draw array[0] at startX.
-                    //     // array[0] is OLDEST. It will be the leftmost bar of the group.
-                    //     // As data grows, startX moves left.
-                    //     // As data scrolls (shift), bars move left.
-
-                    //     const vol = bars[i];
-
-                    //     // Scale height: 0-255 -> 0-100% canvas height. 
-                    //     // Voice often isn't max volume, so let's boost a bit (vol * 2.0)
-                    //     let barHeight = (vol / 255) * canvas.height * 2.0;
-
-                    //     // Min height for "silence track" effect
-                    //     if (barHeight < 2) barHeight = 2;
-
-                    //     const x = startX + (i * totalBarWidth);
-                    //     const y = centerY - (barHeight / 2);
-                    setFrequencyData(newData);
-                    animationFrameRef.current = requestAnimationFrame(updateWaveform);
-                };
-
-                updateWaveform();
-
+                visualize();
             } catch (err) {
-                console.error("Error accessing microphone for visualizer:", err);
+                console.error("Error accessing microphone:", err);
             }
+        };
+
+        const visualize = () => {
+            const canvas = canvasRef.current;
+            const analyser = analyserRef.current;
+            const dataArray = dataArrayRef.current;
+
+            if (!canvas || !analyser || !dataArray) return;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            // Update data
+            analyser.getByteFrequencyData(dataArray as any);
+
+            // Calculate average volume for this frame to treat as "intensity"
+            // We focus on lower frequencies for voice (indices 0-40 mostly coverage for voice)
+            let sum = 0;
+            const voiceRange = Math.min(dataArray.length, 50); // Typical voice range
+            for (let i = 0; i < voiceRange; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / voiceRange;
+
+            // Push to history (scrolling effect logic)
+            // Reverting to Right-to-Left: Add to END (right/newest), Remove from START (left/oldest)
+            historyRef.current.push(average);
+
+            // Limit history length to canvas width (assuming bar width + gap)
+            // Let's say bar width 3px + gap 2px = 5px (finer detail)
+            const barWidth = 3;
+            const gap = 2;
+            const totalBarWidth = barWidth + gap;
+
+            // Adjust maxBars dynamically based on canvas width
+            const maxBars = Math.ceil(canvas.width / totalBarWidth);
+
+            if (historyRef.current.length > maxBars) {
+                historyRef.current.shift(); // Remove oldest (left) to scroll
+            }
+
+            // Drawing
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const bars = historyRef.current;
+            const centerY = canvas.height / 2;
+
+            // Calculate total width of all bars to determine start position (Right Alignment)
+            const currentTotalWidth = bars.length * totalBarWidth;
+            const startX = canvas.width - currentTotalWidth;
+
+            for (let i = 0; i < bars.length; i++) {
+                // Draw array[0] at startX.
+                // array[0] is OLDEST. It will be the leftmost bar of the group.
+                // As data grows, startX moves left.
+                // As data scrolls (shift), bars move left.
+
+                const vol = bars[i];
+
+                // Scale height: 0-255 -> 0-100% canvas height. 
+                // Voice often isn't max volume, so let's boost a bit (vol * 2.0)
+                let barHeight = (vol / 255) * canvas.height * 2.0;
+
+                // Min height for "silence track" effect
+                if (barHeight < 2) barHeight = 2;
+
+                const x = startX + (i * totalBarWidth);
+                const y = centerY - (barHeight / 2);
+
+                // Solid Light Grey as requested
+                ctx.fillStyle = '#cbd5e1'; // slate-300 - clearly visible but "light grey"
+
+                // Rounded bars
+                ctx.beginPath();
+                ctx.roundRect(x, y, barWidth, barHeight, [2]);
+                ctx.fill();
+            }
+
+            animationRef.current = requestAnimationFrame(visualize);
         };
 
         initAudio();
 
         return () => {
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
-            if (sourceRef.current) {
-                sourceRef.current.disconnect();
-            }
-            if (audioContextRef.current) {
-                audioContextRef.current.close();
-            }
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach(track => track.stop());
-            }
+            if (animationRef.current) cancelAnimationFrame(animationRef.current);
+            if (sourceRef.current) sourceRef.current.disconnect();
+            if (audioContextRef.current) audioContextRef.current.close();
         };
     }, []);
 
-    return (
-        <div className="flex items-center justify-center gap-[2px] h-full w-full px-4">
-            {Array.from(frequencyData).map((value, index) => {
-                // Normalize height: value is 0-255.
-                // We want height between maybe 10% and 100%.
-                // Add a minimum height so inactive bars are visible dots/lines.
-                const heightPercent = Math.max(10, (value / 255) * 100);
+    // Handle Resize
+    useEffect(() => {
+        const handleResize = () => {
+            if (canvasRef.current && canvasRef.current.parentElement) {
+                canvasRef.current.width = canvasRef.current.parentElement.clientWidth;
+                canvasRef.current.height = canvasRef.current.parentElement.clientHeight;
+                // Pre-fill history to avoid jump? No, start empty is fine.
+            }
+        };
 
-                return (
-                    <div
-                        key={index}
-                        className="w-1.5 bg-gradient-to-t from-text-primary to-text-secondary rounded-full transition-all duration-75 ease-out opacity-80"
-                        style={{
-                            height: `${heightPercent}%`,
-                        }}
-                    />
-                );
-            })}
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Initial sizing
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return (
+        <div className="w-full h-full flex items-end">
+            <canvas
+                ref={canvasRef}
+                className="w-full h-full"
+                height={64} // Default internal resolution
+            />
         </div>
     );
 }
